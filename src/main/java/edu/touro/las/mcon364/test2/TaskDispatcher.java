@@ -3,8 +3,11 @@ package edu.touro.las.mcon364.test2;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Problem 2 of 3
@@ -46,10 +49,10 @@ public class TaskDispatcher {
     public static final int POOL_SIZE = 4;
 
     // TODO 1: replace null with an appropriate class
-    private final ExecutorService pool = null;
+    private final ExecutorService pool = Executors.newFixedThreadPool(POOL_SIZE);
 
     // TODO 2: replace null — which Lock implementation lets you lock and unlock explicitly?
-    private final Lock lock = null;
+    private final Lock lock = new ReentrantLock();
 
     // provided — do not change
     private final List<String> results = new ArrayList<>();
@@ -61,30 +64,61 @@ public class TaskDispatcher {
      *     (b) record the result by calling recordResult()
      *     (c) return the result
      *   Give back a handle to each piece of work so the caller can retrieve
-     *   the results later. Do not wait for the results here.
+     *   the results later. Do not wa
+     * it for the results here.
      *   You have to use streams!
      */
     public List<Future<String>> dispatch(List<String> tasks) {
-        // TODO 3
-        return null; //placeholder
+        List<Future<String>> futures = new ArrayList<>();
+        for (String task: tasks) {
+            String TASK = task.toUpperCase();
+            //futures.add(TASK);
+            recordResult(TASK);
+        }
+        return futures;
+//        my attempt at using streams.... List<Future<String>> list = tasks.stream().toList(task -> tasks.stream().forEach(t -> task.toUpperCase()));
+//        return list;
     }
 
     public void recordResult(String result) {
+        lock.lock();
+        try {
+            results.add(result);
+        }
+        finally {
+            lock.unlock();
+        }
         //TODO 4
     }
 
     public void shutdown() throws InterruptedException {
-        //TODO 5
+        pool.shutdown();
+        while (!pool.awaitTermination(10, TimeUnit.SECONDS)) {
+        }
     }
 
     public List<String> getResults() {
+        lock.lock();
+        try {
+            return results;
+        }
+        finally {
+            lock.unlock();
+        }
         //TODO 6
-        return null; //placeholder
+        //placeholder
     }
 
     public int getCompletedCount() {
         //TODO 6
-        return 0; //placeholder
+        lock.lock();
+        try {
+            return completedCount;
+        }
+        finally {
+            lock.unlock();
+        }
+         //placeholder
     }
 
 }
