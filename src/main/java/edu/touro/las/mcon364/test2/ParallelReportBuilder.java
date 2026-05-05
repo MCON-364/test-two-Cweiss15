@@ -2,6 +2,8 @@ package edu.touro.las.mcon364.test2;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -48,9 +50,11 @@ public class ParallelReportBuilder {
 
 
     // TODO 1: declare and initialize private thread-safe progress tracking state called numberOfBatchesProcessed
+    private AtomicInteger numberOfBatchesProcessed = new AtomicInteger(0);
     
     /*
      * TODO 2 — generateReport(List<List<Transaction>> batches, int workers)
+     *
      *
      * For each batch, compute:
      * - totalAmount
@@ -72,8 +76,13 @@ public class ParallelReportBuilder {
      * - how to avoid waiting too early
      * - how to handle empty batches or an empty input list
      */
-    public ReportSummary generateReport(List<List<Transaction>> batches, int workers)
+    public List<List<Transaction>> generateReport(List<List<Transaction>> batches, int workers)
             throws InterruptedException, ExecutionException, IllegalArgumentException {
+        ExecutorService pool =
+                Executors.newFixedThreadPool(workers);
+
+
+
 
         // TODO 2A: validate inputs where appropriate
 
@@ -94,11 +103,11 @@ public class ParallelReportBuilder {
         // TODO 2D: after all work has been started, collect results
         // and combine them into the summary variables above
         // you don't have to use streams here. In this case for loop is acceptable
-
+        List<List<Transaction>> transactions = batches;
         // TODO 2E: shut down any concurrency resources you created
-
+        pool.shutdown();
         // TODO 2F: return the completed ReportSummary
-        return null; //placeholder
+        return transactions; //placeholder
     }
 
     /*
@@ -107,6 +116,6 @@ public class ParallelReportBuilder {
      * Return the current number of batches processed.
      */
     public int getProcessedBatchCount() {
-       return 0; //placeholder
+       return numberOfBatchesProcessed.get(); //placeholder
     }
 }
